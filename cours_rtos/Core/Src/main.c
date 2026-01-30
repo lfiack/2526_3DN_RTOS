@@ -18,6 +18,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "cmsis_os.h"
 #include "usart.h"
 #include "gpio.h"
 
@@ -49,6 +50,7 @@
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
+void MX_FREERTOS_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -85,6 +87,40 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 	}
 }
 
+int globale;
+
+void task_led_blink(void * unused)
+{
+	for(;;)
+	{
+		HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
+		//HAL_Delay(100);
+		// HAL_Delay fonctionne en faisant du polling
+		// À éviter dans un RTOS
+		vTaskDelay(100);
+	}
+}
+
+void task_uart1_echo(void * unused)
+{
+	// Configure l'UART1 pour déclancher une interruption lors de la réception d'un caractère
+	uint8_t data;
+	HAL_UART_Receive_IT(&huart1, &data, 1);
+
+	for(;;)
+	{
+		if (uart1_rx_flag == 1)
+		{
+			HAL_UART_Transmit(&huart1, &data, 1, HAL_MAX_DELAY);
+
+			// Traitement lent
+
+			HAL_UART_Receive_IT(&huart1, &data, 1);
+
+			uart1_rx_flag = 0;
+		}
+	}
+}
 /* USER CODE END 0 */
 
 /**
@@ -120,10 +156,20 @@ int main(void)
 	/* USER CODE BEGIN 2 */
 	printf("\r\n ===== 3DN Cours RTOS =====\r\n");
 
-	// Configure l'UART1 pour déclancher une interruption lors de la réception d'un caractère
-	uint8_t data;
-	HAL_UART_Receive_IT(&huart1, &data, 1);
+	xTaskCreate(task_led_blink, "LED Blink", 512, NULL, 1, NULL);
+	xTaskCreate(task_uart1_echo, "UART1 Echo", 512, NULL, 2, NULL);
+
+	vTaskStartScheduler();	// Démarre l'OS = boucle infinie
+							// Il ne se passe rien après cette ligne
 	/* USER CODE END 2 */
+
+	/* Call init function for freertos objects (in cmsis_os2.c) */
+	MX_FREERTOS_Init();
+
+	/* Start scheduler */
+	osKernelStart();
+
+	/* We should never get here as control is now taken by the scheduler */
 
 	/* Infinite loop */
 	/* USER CODE BEGIN WHILE */
@@ -138,18 +184,18 @@ int main(void)
 
 		if (uart1_rx_flag == 1)
 		{
-			HAL_UART_Transmit(&huart1, &data, 1, HAL_MAX_DELAY);
-
-			// Traitement lent
-
-			HAL_UART_Receive_IT(&huart1, &data, 1);
-
-			uart1_rx_flag = 0;
+//			HAL_UART_Transmit(&huart1, &data, 1, HAL_MAX_DELAY);
+//
+//			// Traitement lent
+//
+//			HAL_UART_Receive_IT(&huart1, &data, 1);
+//
+//			uart1_rx_flag = 0;
 		}
 
-//		uint8_t data;
-//		HAL_UART_Receive(&huart1, &data, 1, HAL_MAX_DELAY);
-//		HAL_UART_Transmit(&huart1, &data, 1, HAL_MAX_DELAY);
+		//		uint8_t data;
+		//		HAL_UART_Receive(&huart1, &data, 1, HAL_MAX_DELAY);
+		//		HAL_UART_Transmit(&huart1, &data, 1, HAL_MAX_DELAY);
 		/* USER CODE END WHILE */
 
 		/* USER CODE BEGIN 3 */
@@ -212,6 +258,28 @@ void SystemClock_Config(void)
 /* USER CODE BEGIN 4 */
 
 /* USER CODE END 4 */
+
+/**
+ * @brief  Period elapsed callback in non blocking mode
+ * @note   This function is called  when TIM6 interrupt took place, inside
+ * HAL_TIM_IRQHandler(). It makes a direct call to HAL_IncTick() to increment
+ * a global variable "uwTick" used as application time base.
+ * @param  htim : TIM handle
+ * @retval None
+ */
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+{
+	/* USER CODE BEGIN Callback 0 */
+
+	/* USER CODE END Callback 0 */
+	if (htim->Instance == TIM6)
+	{
+		HAL_IncTick();
+	}
+	/* USER CODE BEGIN Callback 1 */
+
+	/* USER CODE END Callback 1 */
+}
 
 /**
  * @brief  This function is executed in case of error occurrence.
