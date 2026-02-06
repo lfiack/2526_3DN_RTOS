@@ -78,13 +78,19 @@ int __io_putchar(int chr)
 
 /* Utilisation d'interruption si le code est plus lent */
 static int uart1_rx_flag = 0;
+TaskHandle_t h_task_uart1_echo;
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
+	// On ignore la partie "hptw" pour l'instant
+	BaseType_t hptw = pdFALSE;
+
 	if (huart->Instance == USART1)
 	{
-		uart1_rx_flag = 1;
+		// Il faut envoyer une notification à la tâche uart1_echo
+		vTaskNotifyGiveFromISR(h_task_uart1_echo, &hptw);
 	}
+	portYIELD_FROM_ISR(hptw);
 }
 
 int globale;
@@ -94,9 +100,6 @@ void task_led_blink(void * unused)
 	for(;;)
 	{
 		HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
-		//HAL_Delay(100);
-		// HAL_Delay fonctionne en faisant du polling
-		// À éviter dans un RTOS
 		vTaskDelay(100);
 	}
 }
@@ -109,16 +112,13 @@ void task_uart1_echo(void * unused)
 
 	for(;;)
 	{
-		if (uart1_rx_flag == 1)
-		{
-			HAL_UART_Transmit(&huart1, &data, 1, HAL_MAX_DELAY);
+		// Il faut bloquer la tâche jusqu'à ce qu'un caractère soit reçu
+		ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
+		// ulTaskNotifyTake = bloque la tâche jusqu'à ce qu'on reçoive une notification
 
-			// Traitement lent
+		HAL_UART_Transmit(&huart1, &data, 1, HAL_MAX_DELAY);
 
-			HAL_UART_Receive_IT(&huart1, &data, 1);
-
-			uart1_rx_flag = 0;
-		}
+		HAL_UART_Receive_IT(&huart1, &data, 1);
 	}
 }
 /* USER CODE END 0 */
@@ -156,11 +156,25 @@ int main(void)
 	/* USER CODE BEGIN 2 */
 	printf("\r\n ===== 3DN Cours RTOS =====\r\n");
 
-	xTaskCreate(task_led_blink, "LED Blink", 512, NULL, 1, NULL);
-	xTaskCreate(task_uart1_echo, "UART1 Echo", 512, NULL, 2, NULL);
+	BaseType_t ret;
+
+	ret = xTaskCreate(task_led_blink, "LED Blink", 512, NULL, 1, NULL);
+
+	if (ret != pdPASS)
+	{
+		printf("Error creating task LED Blink\r\n");
+		Error_Handler();
+	}
+
+	// &h_task_uart1_echo permet à xTaskCreate de nous fournir le handle dans le tâche
+	if (xTaskCreate(task_uart1_echo, "UART1 Echo", 512, NULL, 2, &h_task_uart1_echo) != pdPASS)
+	{
+		printf("Error creating task UART1 Echo\r\n");
+		Error_Handler();
+	}
 
 	vTaskStartScheduler();	// Démarre l'OS = boucle infinie
-							// Il ne se passe rien après cette ligne
+	// Il ne se passe rien après cette ligne
 	/* USER CODE END 2 */
 
 	/* Call init function for freertos objects (in cmsis_os2.c) */
@@ -184,13 +198,13 @@ int main(void)
 
 		if (uart1_rx_flag == 1)
 		{
-//			HAL_UART_Transmit(&huart1, &data, 1, HAL_MAX_DELAY);
-//
-//			// Traitement lent
-//
-//			HAL_UART_Receive_IT(&huart1, &data, 1);
-//
-//			uart1_rx_flag = 0;
+			//			HAL_UART_Transmit(&huart1, &data, 1, HAL_MAX_DELAY);
+			//
+			//			// Traitement lent
+			//
+			//			HAL_UART_Receive_IT(&huart1, &data, 1);
+			//
+			//			uart1_rx_flag = 0;
 		}
 
 		//		uint8_t data;
