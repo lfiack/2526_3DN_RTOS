@@ -1,7 +1,8 @@
 # 2526 3DN
 
-## Systèmes à microncrôleurs
+## Systèmes à microcontrôleurs
 Les TD de Systèmes à microcontrôleurs sont disponibles ici : [mcu/td/README.md](mcu/td/README.md)
+
 Les TP de Systèmes à microcontrôleurs sont disponibles ici : [mcu/tp/README.md](mcu/tp/README.md)
 
 ## Noyau temps-réel
