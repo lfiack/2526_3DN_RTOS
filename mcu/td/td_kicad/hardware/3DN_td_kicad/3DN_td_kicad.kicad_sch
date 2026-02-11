@@ -2986,6 +2986,16 @@
 			(embedded_fonts no)
 		)
 	)
+	(text "I2C"
+		(exclude_from_sim no)
+		(at 194.056 113.03 0)
+		(effects
+			(font
+				(size 2.54 2.54)
+			)
+		)
+		(uuid "08bd5219-6646-40fd-8544-add208a94e26")
+	)
 	(text "STM32"
 		(exclude_from_sim no)
 		(at 86.36 67.056 0)
@@ -2995,6 +3005,56 @@
 			)
 		)
 		(uuid "1bc5159a-9f7f-46d3-9dd0-3d9eb6be1562")
+	)
+	(text "STLink"
+		(exclude_from_sim no)
+		(at 20.574 67.564 0)
+		(effects
+			(font
+				(size 2.54 2.54)
+			)
+		)
+		(uuid "31f687e0-53f7-4322-a59b-6a1234a6bd48")
+	)
+	(text "ADC"
+		(exclude_from_sim no)
+		(at 194.31 78.74 0)
+		(effects
+			(font
+				(size 2.54 2.54)
+			)
+		)
+		(uuid "515bc372-e7a5-43df-8604-8105b741a900")
+	)
+	(text "SPI"
+		(exclude_from_sim no)
+		(at 193.294 36.068 0)
+		(effects
+			(font
+				(size 2.54 2.54)
+			)
+		)
+		(uuid "71b7a233-4aab-4455-a8c5-ff0c180d2299")
+	)
+	(text "MOUNTING HOLES"
+		(exclude_from_sim no)
+		(at 207.518 16.256 0)
+		(effects
+			(font
+				(size 2.54 2.54)
+			)
+		)
+		(uuid "a4d08341-7421-4ac9-89ea-bee996039c72")
+	)
+	(text "POWER SUPPLY"
+		(exclude_from_sim no)
+		(at 28.956 16.256 0)
+		(effects
+			(font
+				(size 2.54 2.54)
+			)
+		)
+		(uuid "c4323c05-7976-4607-9ecf-d7db23ff129a")
 	)
 	(junction
 		(at 213.36 129.54)
