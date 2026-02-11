@@ -10,3 +10,4 @@
 * Les corrigés de TD sont disponibles dans le dossier [rtos/td](rtos/td/) :
 1. TD1 : [rtos/td/td1.md](rtos/td/td1.md)
 1. TD2 : [rtos/td/td2.md](rtos/td/td2.md)
+1. TD3 : [rtos/td/td3.md](rtos/td/td3.md)
