@@ -16,7 +16,7 @@ Concevoir un PCB disposant d'une entrée et d'une sortie analogique pour réalis
 * **MCU:** STM32G031K8T6
 * **LDO:** MIC5504-3.3YM5
 * **DAC:** MCP4801
-* **AOP:** MCP6002-I/SN
+* **AOP:** MCP6002-I/SN (Boitier ```SOIC-8_3.9x4.9mm_P1.27mm```)
 * **Composants passifs et LED :** boîtier 0603
 * **Connecteurs (alim et entrée/sorties analogiques) :** JST-XH
 
