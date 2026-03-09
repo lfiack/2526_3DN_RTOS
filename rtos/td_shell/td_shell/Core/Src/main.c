@@ -18,6 +18,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "cmsis_os.h"
 #include "usart.h"
 #include "gpio.h"
 
@@ -51,6 +52,7 @@
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
+void MX_FREERTOS_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -94,6 +96,16 @@ int addition(int argc, char ** argv)
 		return -1;
 	}
 }
+
+void task_shell(void * unused)
+{
+	shell_init();
+	shell_add('f', *fonction, "Une fonction");
+	shell_add('a', *addition, "Addition");
+	shell_run();
+	// shell_run = boucle infinie, on ne sort pas de la tache
+	// Rappel : il est interdit de sortir d'une tache!
+}
 /* USER CODE END 0 */
 
 /**
@@ -127,15 +139,27 @@ int main(void)
 	MX_GPIO_Init();
 	MX_USART1_UART_Init();
 	/* USER CODE BEGIN 2 */
-	printf("\r\n==== TD SHELL ====\r\n");
+#define TASK_SHELL_STACK_DEPTH 512
+#define TASK_SHELL_PRIORITY 1
+	xTaskCreate (
+			task_shell,
+			"Shell",
+			TASK_SHELL_STACK_DEPTH,
+			NULL,
+			TASK_SHELL_PRIORITY,
+			NULL
+	);
 
-	shell_init();
-	shell_add('f', fonction, "Une fonction");
-	shell_add('a', addition, "Addition");
-	shell_run();
-
-	printf("TEst\r\n");
+	vTaskStartScheduler();
 	/* USER CODE END 2 */
+
+	/* Call init function for freertos objects (in cmsis_os2.c) */
+	MX_FREERTOS_Init();
+
+	/* Start scheduler */
+	osKernelStart();
+
+	/* We should never get here as control is now taken by the scheduler */
 
 	/* Infinite loop */
 	/* USER CODE BEGIN WHILE */
@@ -197,6 +221,28 @@ void SystemClock_Config(void)
 /* USER CODE BEGIN 4 */
 
 /* USER CODE END 4 */
+
+/**
+ * @brief  Period elapsed callback in non blocking mode
+ * @note   This function is called  when TIM6 interrupt took place, inside
+ * HAL_TIM_IRQHandler(). It makes a direct call to HAL_IncTick() to increment
+ * a global variable "uwTick" used as application time base.
+ * @param  htim : TIM handle
+ * @retval None
+ */
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+{
+	/* USER CODE BEGIN Callback 0 */
+
+	/* USER CODE END Callback 0 */
+	if (htim->Instance == TIM6)
+	{
+		HAL_IncTick();
+	}
+	/* USER CODE BEGIN Callback 1 */
+
+	/* USER CODE END Callback 1 */
+}
 
 /**
  * @brief  This function is executed in case of error occurrence.

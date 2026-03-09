@@ -99,9 +99,6 @@ static int shell_exec(char * buf) {
 	return -1;
 }
 
-static char backspace[] = "\b \b";
-static char prompt[] = "> ";
-
 int shell_run() {
 	int reading = 0;
 	int pos = 0;
@@ -109,7 +106,7 @@ int shell_run() {
 	static char cmd_buffer[BUFFER_SIZE];
 
 	while (1) {
-		uart_write(prompt, 2);
+		uart_write("> ", 2);
 		reading = 1;
 
 		while(reading) {
@@ -132,8 +129,9 @@ int shell_run() {
 			case '\b':
 				if (pos > 0) {      //is there a char to delete?
 					pos--;          //remove it in buffer
+					cmd_buffer[pos] = '\0';
 
-					uart_write(backspace, 3);	// delete the char on the terminal
+					uart_write("\b \b", 3);	// delete the char on the terminal
 				}
 				break;
 				//other characters
