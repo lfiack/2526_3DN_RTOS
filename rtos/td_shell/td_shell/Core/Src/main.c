@@ -24,6 +24,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include <stdio.h>
+#include <stdlib.h>
 #include "shell.h"
 /* USER CODE END Includes */
 
@@ -75,6 +76,24 @@ int fonction(int argc, char ** argv)
 
 	return 0;
 }
+
+int addition(int argc, char ** argv)
+{
+	if (argc == 3)	// Deux arguments + le nom de la fonction
+	{
+		int a = atoi(argv[1]);	// atoi = ASCII to Integer
+		int b = atoi(argv[2]);
+
+		printf("%d + %d = %d\r\n", a, b, a+b);
+
+		return 0;
+	}
+	else
+	{
+		printf("Usage : %s <arg1> <arg2>\r\n", argv[0]);
+		return -1;
+	}
+}
 /* USER CODE END 0 */
 
 /**
@@ -112,6 +131,7 @@ int main(void)
 
 	shell_init();
 	shell_add('f', fonction, "Une fonction");
+	shell_add('a', addition, "Addition");
 	shell_run();
 
 	printf("TEst\r\n");
