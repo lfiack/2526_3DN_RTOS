@@ -19,5 +19,6 @@
 void shell_init();
 int shell_add(char c, int (* pfunc)(int argc, char ** argv), char * description);
 int shell_run();
+void shell_rx_callback(void);
 
 #endif /* INC_LIB_SHELL_SHELL_H_ */

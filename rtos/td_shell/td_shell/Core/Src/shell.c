@@ -12,6 +12,8 @@
 #include "usart.h"
 #include "gpio.h"
 
+#include "cmsis_os.h"
+
 typedef struct{
 	char c;
 	int (* func)(int argc, char ** argv);
@@ -23,10 +25,15 @@ static shell_func_t shell_func_list[SHELL_FUNC_LIST_MAX_SIZE];
 
 static char print_buffer[BUFFER_SIZE];
 
+SemaphoreHandle_t sem_uart_rx;	// Déclaration du sémaphore (attention, ce n'est pas la "création")
+
 static char uart_read() {
 	char c;
 
-	HAL_UART_Receive(&UART_DEVICE, (uint8_t*)(&c), 1, HAL_MAX_DELAY);
+	HAL_UART_Receive_IT(&UART_DEVICE, (uint8_t*)(&c), 1);	// Autorise simplement les interruptions
+	// Trouver une solution pour bloquer la tâche jusqu'à la réception de caractère
+	// On pourrait bloquer sur un sémaphore
+	xSemaphoreTake(sem_uart_rx, portMAX_DELAY);
 
 	return c;
 }
@@ -47,8 +54,17 @@ static int sh_help(int argc, char ** argv) {
 	return 0;
 }
 
+void shell_rx_callback(void)
+{
+	BaseType_t woken = pdFALSE;
+	xSemaphoreGiveFromISR(sem_uart_rx, &woken);
+	portYIELD_FROM_ISR(woken);
+}
+
 void shell_init() {
 	int size = 0;
+
+	sem_uart_rx = xSemaphoreCreateBinary();	// Créé le sémaphore (allocation mémoire et initialisation)
 
 	size = snprintf (print_buffer, BUFFER_SIZE, "\r\n\r\n===== Monsieur Shell v0.2 =====\r\n");
 	uart_write(print_buffer, size);
