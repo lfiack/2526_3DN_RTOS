@@ -707,8 +707,8 @@ cd sdcard
 # Identify your SD Card device.
 lsblk
 
-# Write to the correct device (Ex: /dev/sdb).
-sudo dd if=sdcard.img of=/dev/sdb bs=64K status=progress oflag=sync
+# Write to the correct device (Ex: /dev/sdd).
+sudo dd if=sdcard.img of=/dev/sdX bs=64K status=progress oflag=sync
 ```
 
 ## Tester sur la carte
