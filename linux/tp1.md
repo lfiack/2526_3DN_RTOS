@@ -11,6 +11,12 @@ https://github.com/zangman/de10-nano/blob/master/README.md#getting-started
 
 N'hésitez pas à vous servir de ce tuto pour répondre aux questions.
 
+## Configuration de la carte
+
+Les pins de MSEL doivent être sur la position ```ON```.
+
+![alttext](figures/msel_pins.png)
+
 ## Outils à installer et configuration du système
 
 Toutes les étapes présentées ici ont déjà été effectuées sur les PC de l'école. Vous pouvez passer à l'étape suivante.
@@ -25,6 +31,10 @@ yay -S extra/debootstrap extra/qemu-user-static extra/qemu-user-static-binfmt
 
 ```bash
 sudo usermod -a -G uucp $USER
+```
+
+```bash
+yay -S aur/intel-soc-eds
 ```
 
 ## Récupérer le bon compilateur
@@ -145,7 +155,7 @@ Cette section sert à fixer une adresse MAC. Sans ça, on aurait une adresse MAC
 
 ```bash
 make -C tools gen_eth_addr
-tools/gen_eth_addr
+./tools/gen_eth_addr
 ```
 
 Vous obtiendrez une adresse MAC selon le format suivant :
@@ -159,7 +169,7 @@ Vous obtiendrez une adresse MAC selon le format suivant :
 4. Ouvrez le fichier suivant ```u-boot/include/configs/socfpga_common.h``` et cherchez les lignes suivantes :
 
 ```C
-#define CFG_EXTRA_ENV_SETTINGS \
+#define CONFIG_EXTRA_ENV_SETTINGS \
 	"fdtfile=" CONFIG_DEFAULT_FDT_FILE "\0" \
 	"bootm_size=0xa000000\0" \
 	"kernel_addr_r="__stringify(CONFIG_SYS_LOAD_ADDR)"\0" \
@@ -175,7 +185,7 @@ Vous obtiendrez une adresse MAC selon le format suivant :
 N'oubliez pas le ```\0``` et le ```\```.
 
 ```C
-#define CFG_EXTRA_ENV_SETTINGS \
+#define CONFIG_EXTRA_ENV_SETTINGS \
 	"fdtfile=" CONFIG_DEFAULT_FDT_FILE "\0" \
 	"bootm_size=0xa000000\0" \
 	"kernel_addr_r="__stringify(CONFIG_SYS_LOAD_ADDR)"\0" \
@@ -257,6 +267,8 @@ make ARCH=arm menuconfig
 https://github.com/zangman/de10-nano/blob/master/docs/Building-the-Kernel.md#kernel-options
 
 6. Compilez le noyau (pendant ce temps expliquez le rôle des 3 options que vous avez modifiés ci-dessus) :
+
+> TODO Tester sans LOCALVERSION=zImage
 
 ```bash
 make ARCH=arm LOCALVERSION=zImage -j 8
